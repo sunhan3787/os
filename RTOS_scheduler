@@ -1,0 +1,33 @@
+/*
+RTOS//系统软件，管理应用程序的处理器资源{处理器周期，内存，外设和中断},并提供服务；
+//RTOS服务：{Thread control, Timer, Queue, Semapheore, Mutex, Evet Flags, 内存管理}
+//切换上下文的过程:保存正在运行的线程的上下文到内存中，并还原新线程的上细下文；
+_save_thread_context:
+	MRS R12, PSP;                //pickup thread's stack pointer
+	STMDB R121, {}R4-R11};        //save thread context
+	LOR R0, = _current_thread;   //pickup current thread's stack pointer address
+	LOR R1, [R0];                //pickup current thread's stack pointer
+	STR R12, [R1];               //save thread's stack pointer
+	MOV R12, #0;                 //build null value
+	STR R12, [R0];               //clear current thread pointer
+	B _scheduler;                //look for next thread to excute
+
+......
+
+_scheduler:
+    LOR R0, = next_thread;       //pickup next thread pointer address
+    LOR R1, [R0];                //pickup next thread to scheduler
+    CBZ R1, _scherduler;         //if no thread, continue checking
+    B _restore_thread_context;   
+
+......
+
+_restore_thread_context:
+    LOR R0, = _current_thread;   //pickup current thread's stack pointer address
+    STR R1, [R0];                //setup current thread pointer
+    LOR R12, [R1];               //pickup thread's stack pointer
+    LDMIA R121, {R4 - R11};      //recover thread context
+    MSR PSP, R12;                //setup thread stack pointer
+    MOV LR, #0xFFFFFFFD;         //setup return to thread on PSP
+
+*/
